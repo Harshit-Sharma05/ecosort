@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Log in | EcoSort{% endblock %}
+
+{% block content %}
+{% include "_pages_style.html" %}
+
+<section class="page-wrap narrow">
+
+    <div class="section-heading">
+        <span class="eyebrow">Welcome back</span>
+        <h2>Log in to <span>EcoSort.</span></h2>
+    </div>
+
+    {% include "_flash.html" %}
+
+    <form method="POST" class="auth-card">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        {% if error %}
+        <div class="form-errors"><p>{{ error }}</p></div>
+        {% endif %}
+
+        <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" value="{{ email }}" autocomplete="email" required>
+        </div>
+
+        <div class="field">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" autocomplete="current-password" required>
+        </div>
+
+        <button type="submit" class="btn">Log in</button>
+
+        <p class="auth-switch">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+    </form>
+
+</section>
+{% endblock %}

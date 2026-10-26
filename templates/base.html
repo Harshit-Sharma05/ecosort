@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}EcoSort{% endblock %}</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <style>
+        .nav-links a.active {
+            color: #174035;
+            font-weight: 700;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .nav-login {
+            color: #174035;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .nav-login:hover {
+            text-decoration: underline;
+        }
+
+        .nav-user {
+            color: #5d7269;
+            font-size: 0.95rem;
+        }
+
+        .nav-form {
+            margin: 0;
+        }
+
+        button.nav-button {
+            border: 0;
+            cursor: pointer;
+            font: inherit;
+        }
+
+        @media (max-width: 760px) {
+            .nav-user {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    {% set page = request.endpoint %}
+
+    <header class="navbar">
+        <a href="{{ url_for('home') }}" class="brand">
+            <span class="brand-icon">✳</span>
+            EcoSort
+        </a>
+
+        <nav class="nav-links">
+            <a href="{{ url_for('home') }}" class="{{ 'active' if page == 'home' else '' }}">Home</a>
+            <a href="{{ url_for('dashboard') }}" class="{{ 'active' if page == 'dashboard' else '' }}">Dashboard</a>
+            <a href="{{ url_for('quiz') }}" class="{{ 'active' if page == 'quiz' else '' }}">Quiz</a>
+        </nav>
+
+        <div class="nav-actions">
+            {% if current_user %}
+
+                <span class="nav-user">Hi, {{ current_user.name }}</span>
+
+                <form method="POST" action="{{ url_for('logout') }}" class="nav-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="nav-button">Log out</button>
+                </form>
+
+            {% else %}
+
+                <a href="{{ url_for('login') }}" class="nav-login">Log in</a>
+
+                <a href="{{ url_for('register') }}" class="nav-button">Get Started</a>
+
+            {% endif %}
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>EcoSort — Make waste sorting simple.</p>
+        <p>Smart Waste Segregation Assistant</p>
+    </footer>
+
+</body>
+</html>

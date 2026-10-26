@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz | EcoSort{% endblock %}
+
+{% block content %}
+{% include "_pages_style.html" %}
+
+<section class="page-wrap">
+
+{% if mode == "play" %}
+
+    <div class="section-heading">
+        <span class="eyebrow">Test your knowledge</span>
+        <h2>Waste segregation <span>quiz.</span></h2>
+    </div>
+
+    {% include "_flash.html" %}
+
+    {% if not current_user %}
+    <p class="empty" style="margin: 0 0 20px;">You can play without an account. <a href="{{ url_for('login', next='/quiz') }}">Log in</a> to save your scores to your dashboard.</p>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('quiz') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="qids" value="{{ qids }}">
+
+        {% for q in questions %}
+        <div class="panel quiz-q">
+            <span class="count">Question {{ loop.index }} of {{ questions | length }}</span>
+            <h3>{{ q.q }}</h3>
+            <div class="choice-grid">
+                {% for option in q.options %}
+                <label class="choice">
+                    <input type="radio" name="q{{ q.id }}" value="{{ loop.index0 }}">
+                    <span>{{ option }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <button type="submit" class="btn">Submit answers</button>
+    </form>
+
+{% else %}
+
+    <div class="section-heading">
+        <span class="eyebrow">Your result</span>
+        <h2>You scored <span>{{ score }} / {{ total }}.</span></h2>
+    </div>
+
+    <div class="panel score-banner">
+        <strong>{{ (score * 100 / total) | round | int }}%</strong>
+        <p class="empty">
+            {% if score == total %}Perfect score. You really know your waste!
+            {% elif score * 100 / total >= 70 %}Great work. A few more to master.
+            {% elif score * 100 / total >= 40 %}Good start. Read the explanations below.
+            {% else %}Keep learning. The explanations below will help.{% endif %}
+        </p>
+        {% if saved %}
+        <p class="empty">Saved to your <a href="{{ url_for('dashboard') }}">dashboard</a>.</p>
+        {% else %}
+        <p class="empty"><a href="{{ url_for('login', next='/quiz') }}">Log in</a> next time to save your scores.</p>
+        {% endif %}
+    </div>
+
+    <div style="display: grid; gap: 16px; margin: 24px 0;">
+        {% for item in review %}
+        <div class="panel review-item {{ '' if item.correct else 'wrong' }}">
+            <h3>{{ loop.index }}. {{ item.q.q }}</h3>
+            <p><strong>Your answer:</strong>
+                {% if item.picked is none %}No answer{% else %}{{ item.q.options[item.picked] }}{% endif %}
+                {{ '(correct)' if item.correct else '(incorrect)' }}</p>
+            {% if not item.correct %}
+            <p><strong>Correct answer:</strong> {{ item.q.options[item.q.answer] }}</p>
+            {% endif %}
+            <p class="why">{{ item.q.why }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="dash-actions">
+        <a href="{{ url_for('quiz') }}" class="btn">Try another quiz</a>
+        <a href="{{ url_for('home') }}" class="btn btn-light">Back to home</a>
+    </div>
+
+{% endif %}
+
+</section>
+{% endblock %}

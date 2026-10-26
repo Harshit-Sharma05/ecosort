@@ -1,0 +1,621 @@
+{% extends "base.html" %}
+
+{% block title %}
+EcoSort | Smart Waste Segregation
+{% endblock %}
+
+{% block content %}
+
+{% include "_flash.html" %}
+
+<section class="hero hero-home">
+
+    <div class="hero-content">
+
+        <span class="eyebrow">
+            A smarter way to manage waste
+        </span>
+
+        <h1>
+            Small actions.
+            <span>Cleaner planet.</span>
+        </h1>
+
+        <p>
+            Discover how to sort, recycle, and manage your waste
+            with EcoSort. Make better environmental decisions
+            one item at a time.
+        </p>
+
+        <form
+            class="waste-search-form"
+            method="POST"
+            action="/"
+            id="waste-finder"
+        >
+
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <input
+                type="text"
+                name="item"
+                id="waste-search-input"
+                placeholder="What would you like to dispose of?"
+                value="{{ request.form.get('item', '') }}"
+                aria-label="Enter a waste item"
+                required
+            >
+
+            <button type="submit">
+                Search →
+            </button>
+
+        </form>
+
+        <div class="quick-search">
+
+            <span>Try:</span>
+
+            <button type="button" data-item="banana peel">
+                Banana peel
+            </button>
+
+            <button type="button" data-item="battery">
+                Battery
+            </button>
+
+            <button type="button" data-item="pizza box">
+                Pizza box
+            </button>
+
+            <button type="button" data-item="old charger">
+                Old charger
+            </button>
+
+        </div>
+
+        <div class="hero-actions">
+
+            <a href="#features" class="secondary-button">
+                Discover EcoSort ↓
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="hero-visual">
+
+        {% if result and result.status == "found" %}
+
+        <article class="preview-card">
+
+            <span class="preview-label">
+                YOUR SEARCH RESULT
+            </span>
+
+            <span class="preview-category">
+                {{ result.category }}
+            </span>
+
+            <h2>
+                {{ result.item_name }}
+            </h2>
+
+            <p class="preview-material">
+                {{ result.material }}
+            </p>
+
+            <div class="preview-divider"></div>
+
+            <p>
+                <strong>Collection bin</strong>
+                <span>{{ result.bin }}</span>
+            </p>
+
+            <p>
+                <strong>Disposal</strong>
+                <span>{{ result.disposal }}</span>
+            </p>
+
+            {% if result.safety %}
+            <p>
+                <strong>Safety</strong>
+                <span>{{ result.safety }}</span>
+            </p>
+            {% endif %}
+
+            {% if result.note %}
+            <p class="preview-note">{{ result.note }}</p>
+            {% endif %}
+
+            {% if current_user %}
+            <button type="button" class="log-button" id="log-button"
+                data-item="{{ result.item_name }}"
+                data-category="{{ result.category }}"
+                data-material="{{ result.material }}"
+                data-bin="{{ result.bin }}">
+                Log as disposed
+            </button>
+            {% else %}
+            <a class="link-button" href="{{ url_for('login', next='/') }}">Log in to track your activity</a>
+            {% endif %}
+
+            {% if result.refine %}
+            <form method="POST" action="/refine">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="item" value="{{ result.query }}">
+                <button type="submit" class="link-button">
+                    Not right? Answer two quick questions
+                </button>
+            </form>
+            {% endif %}
+
+        </article>
+
+        {% elif result and result.status == "ambiguous" %}
+
+        <article class="preview-card">
+
+            <span class="preview-label">
+                SEARCH RESULTS
+            </span>
+
+            <h2>
+                More than one match
+            </h2>
+
+            <p>
+                {{ result.message }}
+            </p>
+
+            {% for item in result.candidates %}
+
+            <div class="preview-candidate">
+
+                <strong>{{ item.item_name }}</strong>
+
+                <span>{{ item.material }} · {{ item.bin }}</span>
+
+            </div>
+
+            {% endfor %}
+
+        </article>
+
+        {% elif result and result.status == "ask" %}
+
+        <article class="preview-card">
+
+            <span class="preview-label">
+                LET'S FIND IT TOGETHER
+            </span>
+
+            <h2>
+                Two quick questions
+            </h2>
+
+            <p>
+                {{ result.message }}
+            </p>
+
+            <p>
+                Answer them in the section below.
+            </p>
+
+        </article>
+
+        {% elif result %}
+
+        <article class="preview-card">
+
+            <span class="preview-label">
+                SEARCH RESULTS
+            </span>
+
+            <h2>
+                {{ result.message }}
+            </h2>
+
+            <p>
+                Try another item or one of the suggestions.
+            </p>
+
+        </article>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+
+{% if result and result.status == "ambiguous" %}
+
+<section class="waste-results-section">
+
+    <div class="section-heading">
+
+        <span class="eyebrow">
+            Waste Finder
+        </span>
+
+        <h2>
+            Choose the
+            <span>right item.</span>
+        </h2>
+
+    </div>
+
+    <div class="waste-result-grid">
+
+        {% for item in result.candidates %}
+
+        <article class="waste-result-card">
+
+            <span class="waste-result-category">
+                {{ item.category }}
+            </span>
+
+            <h3>
+                {{ item.item_name }}
+            </h3>
+
+            <p>
+                <strong>Material:</strong>
+                {{ item.material }}
+            </p>
+
+            <p>
+                <strong>Collection bin:</strong>
+                {{ item.bin }}
+            </p>
+
+            <p>
+                <strong>Disposal:</strong>
+                {{ item.disposal }}
+            </p>
+
+            {% if item.safety %}
+            <p>
+                <strong>Safety:</strong>
+                {{ item.safety }}
+            </p>
+            {% endif %}
+
+            {% if current_user %}
+            <button type="button" class="log-button"
+                data-item="{{ item.item_name }}"
+                data-category="{{ item.category }}"
+                data-material="{{ item.material }}"
+                data-bin="{{ item.bin }}">
+                Log as disposed
+            </button>
+            {% else %}
+            <a class="link-button" href="{{ url_for('login', next='/') }}">Log in to track your activity</a>
+            {% endif %}
+
+        </article>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endif %}
+
+
+{% if result and result.status == "ask" %}
+
+<section class="waste-results-section" id="guided-section">
+
+    <div class="section-heading">
+
+        <span class="eyebrow">
+            Waste Finder
+        </span>
+
+        <h2>
+            Tell us a little
+            <span>more.</span>
+        </h2>
+
+    </div>
+
+    <form method="POST" action="/guided" class="guided-form">
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <input type="hidden" name="item" value="{{ result.query }}">
+
+        {% set q1 = result.questions[0] %}
+        {% set q2 = result.questions[1] %}
+
+        <div class="guided-step">
+
+            <span class="guided-step-label">Question 1 of 2</span>
+
+            <h3 class="guided-question">{{ q1.text }}</h3>
+
+            <div class="choice-grid">
+                {% for option in q1.options %}
+                <label class="choice">
+                    <input type="radio" name="material" value="{{ option }}" required>
+                    <span>{{ option }}</span>
+                </label>
+                {% endfor %}
+            </div>
+
+        </div>
+
+        <div class="guided-step">
+
+            <span class="guided-step-label">Question 2 of 2</span>
+
+            <h3 class="guided-question">{{ q2.text }}</h3>
+
+            <p class="guided-hint">This only matters if your item is plastic or paper.</p>
+
+            <div class="choice-grid choice-grid-two">
+                {% for option in q2.options %}
+                <label class="choice">
+                    <input type="radio" name="special" value="{{ option }}" {% if loop.first %}checked{% endif %}>
+                    <span>{{ option }}</span>
+                </label>
+                {% endfor %}
+            </div>
+
+        </div>
+
+        <button type="submit" class="guided-submit">
+            Show me where it goes →
+        </button>
+
+    </form>
+
+</section>
+
+<style>
+    .guided-form { max-width: 920px; margin: 0 auto; display: grid; gap: 24px; }
+
+    .guided-step {
+        background: #ffffff;
+        border: 1px solid rgba(23, 64, 53, 0.10);
+        border-radius: 28px;
+        padding: 32px;
+        box-shadow: 0 12px 32px rgba(23, 64, 53, 0.06);
+    }
+
+    .guided-step-label {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #2c6a52;
+        margin-bottom: 10px;
+    }
+
+    .guided-question {
+        margin: 0 0 6px;
+        font-size: 1.35rem;
+        line-height: 1.3;
+        color: #174035;
+    }
+
+    .guided-hint { margin: 0 0 4px; color: #6b7f77; font-size: 0.95rem; }
+
+    .choice-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    .choice-grid-two { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+
+    .choice { position: relative; display: block; cursor: pointer; }
+
+    .choice input {
+        position: absolute;
+        opacity: 0;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .choice span {
+        display: flex;
+        align-items: center;
+        min-height: 56px;
+        padding: 14px 18px;
+        border: 1.5px solid rgba(23, 64, 53, 0.16);
+        border-radius: 18px;
+        background: #faf8f2;
+        color: #174035;
+        font-weight: 500;
+        line-height: 1.35;
+        transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
+    }
+
+    .choice:hover span { border-color: #174035; transform: translateY(-1px); }
+
+    .choice input:checked + span {
+        background: #174035;
+        border-color: #174035;
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    .choice input:focus-visible + span {
+        outline: 3px solid rgba(44, 106, 82, 0.45);
+        outline-offset: 2px;
+    }
+
+    .guided-submit {
+        justify-self: start;
+        background: #174035;
+        color: #ffffff;
+        border: 0;
+        border-radius: 999px;
+        padding: 16px 34px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.15s, transform 0.15s;
+    }
+
+    .guided-submit:hover { background: #0f2d25; transform: translateY(-1px); }
+
+    @media (max-width: 600px) {
+        .guided-step { padding: 22px; border-radius: 22px; }
+        .guided-submit { width: 100%; justify-self: stretch; }
+    }
+</style>
+
+{% endif %}
+
+
+<section id="features" class="features">
+
+    <div class="section-heading">
+
+        <span class="eyebrow">
+            What you can do
+        </span>
+
+        <h2>
+            Waste management,
+            <span>made simpler.</span>
+        </h2>
+
+    </div>
+
+    <div class="feature-grid">
+
+        <article class="feature-card">
+
+            <span class="feature-number">01</span>
+
+            <h3>Find your waste category</h3>
+
+            <p>
+                Search for everyday waste items and discover
+                how they should be segregated.
+            </p>
+
+        </article>
+
+        <article class="feature-card">
+
+            <span class="feature-number">02</span>
+
+            <h3>Track your activity</h3>
+
+            <p>
+                Record your waste management activities
+                and review your personal progress.
+            </p>
+
+        </article>
+
+        <article class="feature-card">
+
+            <span class="feature-number">03</span>
+
+            <h3>Learn and improve</h3>
+
+            <p>
+                Explore environmental information and
+                test your knowledge through quizzes.
+            </p>
+
+        </article>
+
+    </div>
+
+</section>
+
+
+<style>
+    .preview-note { font-size: 0.9rem; opacity: 0.75; margin-top: 12px; }
+    .log-button { display: block; width: 100%; margin-top: 18px; background: #174035; color: #fff; border: 0; border-radius: 999px; padding: 14px 22px; font-weight: 700; font-size: 1rem; cursor: pointer; font-family: inherit; }
+    .log-button:hover:not(:disabled) { background: #0f2d25; }
+    .log-button:disabled { opacity: .75; cursor: default; }
+    a.link-button { display: inline-block; }
+    .link-button { background: none; border: 0; padding: 0; margin-top: 8px; color: #174035; font-weight: 600; text-decoration: underline; cursor: pointer; }
+</style>
+
+<script>
+    const wasteSearchInput = document.getElementById("waste-search-input");
+
+    const quickSearchButtons = document.querySelectorAll(
+        ".quick-search button[data-item]"
+    );
+
+    window.addEventListener("load", function() {
+
+        const guidedSection = document.getElementById("guided-section");
+        const resultCard = document.querySelector(".preview-card");
+
+        if (guidedSection) {
+            guidedSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else if (resultCard) {
+            resultCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+
+    });
+
+    document.querySelectorAll(".log-button").forEach(function(logButton) {
+
+        logButton.addEventListener("click", async function() {
+            logButton.disabled = true;
+            logButton.textContent = "Saving...";
+
+            try {
+                const response = await fetch("/log", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-Token": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({
+                        item_name: logButton.dataset.item,
+                        category: logButton.dataset.category,
+                        material: logButton.dataset.material,
+                        bin: logButton.dataset.bin
+                    })
+                });
+
+                if (response.ok) {
+                    logButton.textContent = "Logged \u2713 Saved to your dashboard";
+                } else {
+                    logButton.disabled = false;
+                    logButton.textContent = "Could not save. Try again";
+                }
+            } catch (error) {
+                logButton.disabled = false;
+                logButton.textContent = "Could not save. Try again";
+            }
+        });
+
+    });
+
+    quickSearchButtons.forEach(function(button) {
+
+        button.addEventListener("click", function() {
+
+            wasteSearchInput.value = button.dataset.item;
+
+            wasteSearchInput.focus();
+
+        });
+
+    });
+</script>
+
+{% endblock %}

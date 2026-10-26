@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Create account | EcoSort{% endblock %}
+
+{% block content %}
+{% include "_pages_style.html" %}
+
+<section class="page-wrap narrow">
+
+    <div class="section-heading">
+        <span class="eyebrow">Join EcoSort</span>
+        <h2>Create your <span>account.</span></h2>
+    </div>
+
+    <form method="POST" class="auth-card">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        {% if errors %}
+        <div class="form-errors">
+            {% for e in errors %}<p>{{ e }}</p>{% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="field">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" value="{{ form.name }}" maxlength="60" autocomplete="name" required>
+        </div>
+
+        <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" value="{{ form.email }}" autocomplete="email" required>
+        </div>
+
+        <div class="field">
+            <label for="password">Password <small>(at least 8 characters)</small></label>
+            <input type="password" id="password" name="password" minlength="8" autocomplete="new-password" required>
+        </div>
+
+        <div class="field">
+            <label for="confirm">Confirm password</label>
+            <input type="password" id="confirm" name="confirm" minlength="8" autocomplete="new-password" required>
+        </div>
+
+        <button type="submit" class="btn">Create account</button>
+
+        <p class="auth-switch">Already have an account? <a href="{{ url_for('login') }}">Log in</a></p>
+    </form>
+
+</section>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | EcoSort{% endblock %}
+
+{% block content %}
+{% include "_pages_style.html" %}
+
+<section class="page-wrap">
+
+    <div class="section-heading">
+        <span class="eyebrow">Your dashboard</span>
+        <h2>Hello, <span>{{ current_user.name }}.</span></h2>
+    </div>
+
+    {% include "_flash.html" %}
+
+    <div class="stat-grid">
+        <div class="stat-card"><strong>{{ logged }}</strong><span>Items logged as disposed</span></div>
+        <div class="stat-card"><strong>{{ searches }}</strong><span>Searches made</span></div>
+        <div class="stat-card"><strong>{{ streak }}</strong><span>Day streak</span></div>
+        <div class="stat-card"><strong>{% if best_quiz is not none %}{{ best_quiz }}%{% else %}-{% endif %}</strong><span>Best quiz score</span></div>
+    </div>
+
+    <div class="dash-grid">
+
+        <div class="panel">
+            <h3>Items disposed, by category</h3>
+            {% if bars %}
+                {% for b in bars %}
+                {% set slug = b.category | lower | replace(' ', '-') %}
+                <div class="bar-row">
+                    <span>{{ b.category }}</span>
+                    <svg class="bar-svg" width="100%" height="14" role="img" aria-label="{{ b.count }} items">
+                        <rect class="bar-bg" width="100%" height="14" rx="7"></rect>
+                        <rect class="bar-fill fill-{{ slug }}" width="{{ b.pct }}%" height="14" rx="7"></rect>
+                    </svg>
+                    <strong>{{ b.count }}</strong>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="empty">Nothing logged yet. Search for an item on the home page and press <strong>Log as disposed</strong> to see your chart here.</p>
+            {% endif %}
+        </div>
+
+        <div class="panel">
+            <h3>Recent activity</h3>
+            {% if recent %}
+            <ul class="activity-list">
+                {% for a in recent %}
+                <li>
+                    <div>
+                        <strong>{{ a.item_name }}</strong>
+                        <small>{{ a.bin }} &middot; {{ a.created_at | pretty_date }}</small>
+                    </div>
+                    <div style="text-align: right;">
+                        <span class="chip cat-{{ a.category | lower | replace(' ', '-') }}">{{ a.category }}</span><br>
+                        <span class="action-tag">{{ 'Logged' if a.action == 'disposed' else 'Searched' }}</span>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+                <p class="empty">No activity yet. Try searching for an item on the home page.</p>
+            {% endif %}
+        </div>
+
+        <div class="panel">
+            <h3>Recent quizzes</h3>
+            {% if quizzes %}
+            <ul class="activity-list">
+                {% for q in quizzes %}
+                <li>
+                    <div><strong>{{ q.score }} / {{ q.total }}</strong><small>{{ q.created_at | pretty_date }}</small></div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+                <p class="empty">You have not taken a quiz yet.</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div class="dash-actions">
+        <a href="{{ url_for('home') }}#waste-finder" class="btn">Search an item</a>
+        <a href="{{ url_for('quiz') }}" class="btn btn-light">Take the quiz</a>
+
+        <form method="POST" action="{{ url_for('logout') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-light">Log out</button>
+        </form>
+
+        <form method="POST" action="{{ url_for('clear_history') }}" onsubmit="return confirm('Clear all your logged activity? This cannot be undone.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-light">Clear my history</button>
+        </form>
+    </div>
+
+</section>
+{% endblock %}
