@@ -187,8 +187,8 @@ file that imports `app`, and Force HTTPS switched on.
 
 | Name | Registration No. | Roll No. | Part of the project | What I contributed |
 | --- | --- | --- | --- | --- |
-| Harshit Sharma | 12618072 | RK4P26HBA04 | Developer and deployment | Built the app (classifier, accounts, dashboard, quiz), tested it, hosted it on PythonAnywhere, set up the GitHub repository, records and edits the demo video, posts it on social media and tracks the views |
-| Ayushi Katiyar | 12628607 | RK4P26HBA05 | Testing, content, video and outreach | Tests the live site and reports problems, checks the quiz questions against the official 2026 rules, adds new waste items to the data file, takes the screenshots, wrote the handwritten project report |
+| Harshit Sharma | 12618072 | RK4P26HBA04 | Developer, deployment, video and outreach | Built the app (classifier, accounts, dashboard, quiz), tested it, hosted it on PythonAnywhere, set up the GitHub repository, records and edits the demo video, posts it on social media and tracks the views |
+| Ayushi Katiyar | 12628607 | RK4P26HBA05 | Testing, content and documentation | Tests the live site and reports problems, checks the quiz questions against the official 2026 rules, adds new waste items to the data file, takes the screenshots, wrote the handwritten project report |
 
 ## 13. References
 
