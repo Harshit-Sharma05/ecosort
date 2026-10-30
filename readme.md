@@ -195,6 +195,6 @@ file that imports `app`, and Force HTTPS switched on.
 - Solid Waste Management Rules, 2026, Ministry of Environment, Forest and Climate
   Change, Government of India (notified January 2026, in force from 1 April 2026).
 - Press Information Bureau (PIB) announcements on the rules.
-
+- Environmental report.
 The quiz facts follow these sources. Check the official notification before
 changing them.
